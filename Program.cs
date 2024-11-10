@@ -1,9 +1,19 @@
+using make_it_happen.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Database mySQL
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+  var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+  options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 
 var app = builder.Build();
 
