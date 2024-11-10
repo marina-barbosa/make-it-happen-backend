@@ -1,0 +1,14 @@
+@make_it_happen_HostAddress = http://localhost:5135
+
+GET {{make_it_happen_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+
+@url = http://localhost:5135
+
+GET {{url}}/ping
+Accept: application/json
+
+###
