@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace make_it_happen.Models;
 public class Campaign
@@ -41,11 +42,14 @@ public class Campaign
   public string? Status { get; set; }
 
   [ForeignKey("UserId")]
+  [JsonIgnore]
   public virtual User? User { get; set; }
 
   [ForeignKey("CategoryId")]
+  [JsonIgnore]
   public virtual Category? Category { get; set; }
 
+  [JsonIgnore]
   public ICollection<DonateHistory>? DonationHistory { get; set; } = new List<DonateHistory>();
 
 }

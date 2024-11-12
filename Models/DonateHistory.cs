@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace make_it_happen.Models;
 public class DonateHistory
@@ -25,8 +26,10 @@ public class DonateHistory
   public bool? ReceiptSent { get; set; }
 
   [ForeignKey("UserId")]
+  [JsonIgnore]
   public virtual User? User { get; set; }
 
   [ForeignKey("CampaignId")]
+  [JsonIgnore]
   public virtual Campaign? Campaign { get; set; }
 }

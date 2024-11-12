@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace make_it_happen.Models;
 public class User
@@ -14,6 +15,7 @@ public class User
   public string Email { get; set; } = string.Empty;
 
   [MaxLength(255)]
+  [JsonIgnore]
   public string Password { get; set; } = string.Empty;
 
   [MaxLength(500)]
@@ -31,8 +33,11 @@ public class User
 
   public bool? EmailVerified { get; set; }
 
+
+  [JsonIgnore]
   public ICollection<DonateHistory>? DonationHistory { get; set; } = new List<DonateHistory>();
 
+  [JsonIgnore]
   public ICollection<Campaign>? Campaigns { get; set; } = new List<Campaign>();
 
 }
