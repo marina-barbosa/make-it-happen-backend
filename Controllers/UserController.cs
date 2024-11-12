@@ -16,17 +16,21 @@ public class UserController(AppDbContext context) : ControllerBase
   [HttpGet("list")]
   public ActionResult<IEnumerable<User>> ListUsers()
   {
-    if (_context.Users == null)
-    {
-      return NotFound("Nenhum usuário encontrado");
-    }
+    if (_context.Users == null) return NotFound("Nenhum usuário encontrado");
+
     var users = _context.Users.ToList();
+
     return Ok(users);
   }
 
-  public ActionResult<IEnumerable<User>> GetUserById()
+  [HttpGet("{id:int}")]
+  public ActionResult<User> GetUserById(int id)
   {
-    return Ok();
+    var user = _context.Users!.FirstOrDefault(x => x.UserId == id);
+
+    if (user == null) return NotFound("Usuário não encontrado");
+
+    return Ok(user);
   }
 
   [HttpPost]
