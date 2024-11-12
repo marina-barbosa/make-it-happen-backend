@@ -58,4 +58,14 @@ public class UserController(AppDbContext context) : ControllerBase
     _context.SaveChanges();
     return Ok(user);
   }
+
+  [HttpDelete("{id:int}")]
+  public ActionResult<User> DeleteUser(int id)
+  {
+    var user = _context.Users!.FirstOrDefault(x => x.UserId == id);
+    if (user == null) return NotFound("Usuário nao encontrado");
+    _context.Users!.Remove(user);
+    _context.SaveChanges();
+    return NoContent();
+  }
 }
