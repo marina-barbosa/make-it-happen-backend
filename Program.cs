@@ -1,10 +1,14 @@
+using System.Text.Json.Serialization;
 using make_it_happen.Context;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+  .AddJsonOptions(options =>
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -19,8 +23,8 @@ var app = builder.Build();
 
 app.Lifetime.ApplicationStarted.Register(() =>
 {
-    Console.WriteLine($"\n\n🚀 Servidor online: {app.Urls?.FirstOrDefault()} 🌐");
-    Console.WriteLine($"🚀 Lembre de rodar o docker!\n\n");
+  Console.WriteLine($"\n\n🚀 Servidor online: {app.Urls?.FirstOrDefault()} 🌐");
+  Console.WriteLine($"🚀 Lembre de rodar o docker!\n\n");
 });
 
 if (app.Environment.IsDevelopment())
