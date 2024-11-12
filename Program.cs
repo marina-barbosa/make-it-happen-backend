@@ -17,6 +17,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 var app = builder.Build();
 
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    Console.WriteLine($"\n\n🚀 Servidor online: {app.Urls?.FirstOrDefault()} 🌐");
+    Console.WriteLine($"🚀 Lembre de rodar o docker!\n\n");
+});
+
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();

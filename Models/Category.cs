@@ -8,7 +8,7 @@ public class Category
 
   [Required]
   [MaxLength(80)]
-  public string Name { get; set; }
+  public string Name { get; set; } = string.Empty;
 
   public ICollection<Campaign> Campaigns { get; set; } = new List<Campaign>();
 }

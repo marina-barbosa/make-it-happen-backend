@@ -7,14 +7,14 @@ public class User
   public int UserId { get; set; }
 
   [MaxLength(80)]
-  public string Name { get; set; }
+  public string Name { get; set; } = string.Empty;
 
   [EmailAddress]
   [MaxLength(255)]
-  public string Email { get; set; }
+  public string Email { get; set; } = string.Empty;
 
   [MaxLength(255)]
-  public string Password { get; set; }
+  public string Password { get; set; } = string.Empty;
 
   [MaxLength(500)]
   public string? AvatarUrl { get; set; }
