@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using make_it_happen.Context;
+using make_it_happen.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
   options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 

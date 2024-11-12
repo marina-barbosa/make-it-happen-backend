@@ -15,7 +15,6 @@ public class User
   public string Email { get; set; } = string.Empty;
 
   [MaxLength(255)]
-  [JsonIgnore]
   public string Password { get; set; } = string.Empty;
 
   [MaxLength(500)]
