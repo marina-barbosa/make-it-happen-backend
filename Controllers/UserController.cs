@@ -18,14 +18,14 @@ public class UserController(AppDbContext context) : ControllerBase
   public ActionResult<IEnumerable<User>> ListUsers()
   {
     if (_context.Users == null) return NotFound("Nenhum usuário encontrado");
-    var users = _context.Users.ToList();
+    var users = _context.Users.AsNoTracking().ToList();
     return Ok(users);
   }
 
   [HttpGet("{id:int}", Name = "GetUserById")]
   public ActionResult<User> GetUserById(int id)
   {
-    var user = _context.Users!.FirstOrDefault(x => x.UserId == id);
+    var user = _context.Users!.AsNoTracking().FirstOrDefault(x => x.UserId == id);
     if (user == null) return NotFound("Usuário não encontrado");
     return Ok(user);
   }
