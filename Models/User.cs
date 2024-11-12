@@ -24,7 +24,7 @@ public class User
   [MaxLength(80)]
   public string? Contact { get; set; }
 
-  public DateTime? CreationDate { get; set; }
+  public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
   [MaxLength(80)]
   public string? Status { get; set; }
