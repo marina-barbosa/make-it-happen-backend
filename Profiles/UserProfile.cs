@@ -8,8 +8,21 @@ namespace make_it_happen.Profiles
   {
     public UserProfile()
     {
+
       CreateMap<User, UserDto>().ReverseMap();
-      CreateMap<UserDto, User>().ReverseMap();
+
+      CreateMap<User, UserProfileDto>();
+
+      // Mapeamento de User para UserProfileDto (informações completas)
+      // CreateMap<User, UserProfileDto>()
+          // .ForMember(dest => dest.DonationHistory, opt => opt.MapFrom(src => src.DonationHistory))
+          // .ForMember(dest => dest.Campaigns, opt => opt.MapFrom(src => src.Campaigns));
+
+      // Mapeamento de DonateHistory para DonateHistoryDto
+      // CreateMap<DonateHistory, DonateHistoryDto>();
+
+      // // Mapeamento de Campaign para CampaignDto
+      // CreateMap<Campaign, CampaignDto>();
     }
   }
 }

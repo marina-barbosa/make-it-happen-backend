@@ -1,8 +1,6 @@
-using System.ComponentModel.DataAnnotations;
-
-namespace make_it_happen.DTOs
+namespace make_it_happen.Models
 {
-    public class UserDto
+    public class UserProfileDto
     {
         public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -11,5 +9,7 @@ namespace make_it_happen.DTOs
         public string? Bio { get; set; }
         public string? Status { get; set; }
         public bool? EmailVerified { get; set; }
+        // public ICollection<DonateHistoryDto>? DonationHistory { get; set; } = new List<DonateHistoryDto>();
+        // public ICollection<CampaignDto>? Campaigns { get; set; } = new List<CampaignDto>();
     }
 }

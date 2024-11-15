@@ -1,4 +1,6 @@
 
+using AutoMapper;
+using make_it_happen.DTOs;
 using make_it_happen.Models;
 using make_it_happen.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -8,64 +10,66 @@ namespace make_it_happen.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 public class UserController : ControllerBase
-    {
-        private readonly IUserRepository _userRepository;
+{
+  private readonly IUserRepository _userRepository;
+  private readonly IMapper _mapper;
 
-        public UserController(IUserRepository userRepository)
-        {
-            _userRepository = userRepository;
-        }
+  public UserController(IUserRepository userRepository, IMapper mapper)
+  {
+    _userRepository = userRepository;
+    _mapper = mapper;
+  }
 
-        [HttpGet("list")]
-        public ActionResult<IEnumerable<User>> ListUsers()
-        {
-            var users = _userRepository.ListUsers();
-            return Ok(users);
-        }
+  [HttpGet("list")]
+  public ActionResult<IEnumerable<UserDto>> ListUsers()
+  {
+    var users = _userRepository.ListUsers();
+    var userDtos = _mapper.Map<IEnumerable<UserDto>>(users);
+    return Ok(userDtos);
+  }
 
-        [HttpGet("{id:int:min(1)}", Name = "GetUserById")]
-        public ActionResult<User> GetUserById(int id)
-        {
-            var user = _userRepository.GetUserById(id);
-            if (user == null) return NotFound("Usuário não encontrado");
-            return Ok(user);
-        }
+  [HttpGet("{id:int:min(1)}", Name = "GetUserById")]
+  public ActionResult<UserProfileDto> GetUserById(int id)
+  {
+    var user = _userRepository.GetUserById(id);
+    if (user == null) return NotFound("Usuário não encontrado");
 
-        [HttpPost]
-        public ActionResult<User> CreateUser(User user)
-        {
-            _userRepository.CreateUser(user);
-            return CreatedAtRoute("GetUserById", new { id = user.UserId }, user);
-        }
+    var userProfileDto = _mapper.Map<UserProfileDto>(user);
+    return Ok(userProfileDto);
+  }
 
-        [HttpPut("{id:int}")]
-        public ActionResult<User> UpdateUser(int id, User user)
-        {
-            if (id != user.UserId) return BadRequest("O id informado não pode ser diferente do id do usuário");
+  [HttpPost]
+  public ActionResult<UserDto> CreateUser(CreateUserDto createUserDto)
+  {
+    var user = _mapper.Map<User>(createUserDto);
+    _userRepository.CreateUser(user);
 
-            var userToUpdate = _userRepository.GetUserById(id);
-            if (userToUpdate == null) return NotFound("Usuário não encontrado");
+    var userDto = _mapper.Map<UserDto>(user);
+    return CreatedAtRoute("GetUserById", new { id = user.UserId }, userDto);
+  }
 
-            userToUpdate.Name = user.Name;
-            userToUpdate.Email = user.Email;
-            userToUpdate.Password = user.Password;
-            userToUpdate.AvatarUrl = user.AvatarUrl;
-            userToUpdate.Bio = user.Bio;
-            userToUpdate.Contact = user.Contact;
-            userToUpdate.Status = user.Status;
-            userToUpdate.EmailVerified = user.EmailVerified;
+  [HttpPut("{id:int}")]
+  public ActionResult<UserDto> UpdateUser(int id, UpdateUserDto updateUserDto)
+  {
+    if (id != updateUserDto.UserId) return BadRequest("O id informado não pode ser diferente do id do usuário");
 
-            _userRepository.UpdateUser(userToUpdate);
-            return Ok(user);
-        }
+    var userToUpdate = _userRepository.GetUserById(id);
+    if (userToUpdate == null) return NotFound("Usuário não encontrado");
 
-        [HttpDelete("{id:int}")]
-        public ActionResult DeleteUser(int id)
-        {
-            var user = _userRepository.GetUserById(id);
-            if (user == null) return NotFound("Usuário não encontrado");
+    _mapper.Map(updateUserDto, userToUpdate);
+    _userRepository.UpdateUser(userToUpdate);
 
-            _userRepository.DeleteUser(id);
-            return NoContent();
-        }
-    }
+    var userDto = _mapper.Map<UserDto>(userToUpdate);
+    return Ok(userDto);
+  }
+
+  [HttpDelete("{id:int}")]
+  public ActionResult DeleteUser(int id)
+  {
+    var user = _userRepository.GetUserById(id);
+    if (user == null) return NotFound("Usuário não encontrado");
+
+    _userRepository.DeleteUser(id);
+    return NoContent();
+  }
+}
