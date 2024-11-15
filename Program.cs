@@ -20,7 +20,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();  
+builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
