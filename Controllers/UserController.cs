@@ -3,6 +3,7 @@ using AutoMapper;
 using make_it_happen.DTOs;
 using make_it_happen.Models;
 using make_it_happen.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace make_it_happen.Controllers;
@@ -21,6 +22,7 @@ public class UserController : ControllerBase
   }
 
   [HttpGet("list")]
+  // [Authorize]
   public ActionResult<IEnumerable<UserDto>> ListUsers()
   {
     var users = _userRepository.ListUsers();

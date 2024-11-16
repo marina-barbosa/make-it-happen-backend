@@ -13,6 +13,8 @@ namespace make_it_happen.Profiles
 
       CreateMap<User, UserProfileDto>();
 
+      CreateMap<User, UpdateUserDto>().ReverseMap();
+
       // Mapeamento de User para UserProfileDto (informações completas)
       // CreateMap<User, UserProfileDto>()
           // .ForMember(dest => dest.DonationHistory, opt => opt.MapFrom(src => src.DonationHistory))

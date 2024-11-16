@@ -23,6 +23,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();  
 builder.Services.AddAutoMapper(typeof(Program));
 
+// Configuração de autenticação JWT
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+
 var app = builder.Build();
 
 app.Lifetime.ApplicationStarted.Register(() =>
@@ -31,6 +35,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
   Console.WriteLine($"🚀 Lembre de rodar o docker!\n\n");
 });
 
+// http://localhost:5135/swagger/index.html
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
@@ -45,6 +50,13 @@ app.MapGet("/ping", () =>
   return "pong!";
 })
 .WithName("Ping-Pong")
+.WithOpenApi();
+
+app.MapGet("/", () =>
+{
+  return "online!";
+})
+.WithName("Home")
 .WithOpenApi();
 
 
