@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using make_it_happen.Context;
 using make_it_happen.Repositories;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,12 +21,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();  
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Configuração de autenticação JWT
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+
+// Identity Framework
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+  .AddEntityFrameworkStores<AppDbContext>()
+  .AddDefaultTokenProviders();
 
 var app = builder.Build();
 
