@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using make_it_happen.DTOs;
 using make_it_happen.Services;
 using make_it_happen.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace make_it_happen.Controllers;
 
@@ -19,6 +20,14 @@ public class AuthController(ITokenService tokenService,
   private readonly UserManager<ApplicationUser> _userManager = userManager;
   private readonly RoleManager<IdentityRole> _roleManager = roleManager;
   private readonly IConfiguration _configuration = configuration;
+
+  // teste token
+  [HttpGet("test")]
+  // [Authorize]
+  public async Task<IActionResult> Test()
+  {
+    return Ok();
+  }
 
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginModelDTO dto)
