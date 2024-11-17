@@ -4,8 +4,8 @@ namespace make_it_happen.DTOs
 {
   public class RegisterModelDTO
   {
-    [Required(ErrorMessage = "Name is required")]
-    public string? Name { get; set; }
+    [Required(ErrorMessage = "Username is required")]
+    public string? Username { get; set; }
     [Required]
     [EmailAddress(ErrorMessage = "Invalid email address")]
     public string? Email { get; set; }
