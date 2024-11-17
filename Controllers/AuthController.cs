@@ -6,6 +6,7 @@ using make_it_happen.DTOs;
 using make_it_happen.Services;
 using make_it_happen.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Text;
 
 namespace make_it_happen.Controllers;
 
@@ -47,11 +48,11 @@ public class AuthController(ITokenService tokenService,
       }
       var token = _tokenService.GenerateAccessToken(authClaims, _configuration);
       var refreshToken = _tokenService.GenerateRefreshToken();
-      _ = int.TryParse(_configuration["JWT:RefreshTokenValidityInMinutes"],
-                                    out int refreshTokenValidityInMinutes);
+      _ = int.TryParse(_configuration["JWT:RefreshTokenExpirationInDays"],
+                                    out int refreshTokenValidityInDays);
 
       user.RefreshTokenExpiryTime =
-            DateTime.Now.AddMinutes(refreshTokenValidityInMinutes);
+            DateTime.UtcNow.AddDays(refreshTokenValidityInDays);
 
       user.RefreshToken = refreshToken;
 
@@ -99,35 +100,48 @@ public class AuthController(ITokenService tokenService,
 
 
   [HttpPost("refresh-token")]
-  public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO dto)
+  public async Task<IActionResult> RefreshToken(TokenModelDTO dto)
   {
     if (dto is null)
     {
       return BadRequest("Invalid client request");
     }
-    string? accessToken = dto.AccessToken
-      ?? throw new ArgumentNullException(nameof(dto.AccessToken));
-    string? refreshToken = dto.RefreshToken
-      ?? throw new ArgumentNullException(nameof(dto.RefreshToken));
+
+    if (string.IsNullOrEmpty(dto.AccessToken) || string.IsNullOrEmpty(dto.RefreshToken))
+    {
+      return BadRequest("Access token and refresh token are required.");
+    }
+
+    string? accessToken = dto.AccessToken;
+    string? refreshToken = dto.RefreshToken;
     var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken, _configuration);
+
     if (principal is null)
     {
-      return BadRequest("Invalid access token or refresh token");
+      return BadRequest("Invalid access token or refresh token.");
     }
     string? username = principal.Identity?.Name;
-#pragma warning disable CS8604 // Possível argumento de referência nula.
-    var user = await _userManager.FindByNameAsync(username);
-#pragma warning restore CS8604 // Possível argumento de referência nula.
-    if (user is null ||
-       user.RefreshToken != refreshToken ||
-       user.RefreshTokenExpiryTime <= DateTime.Now)
+
+    if (string.IsNullOrEmpty(username))
     {
-      return BadRequest("Invalid access token or refresh token");
+      return BadRequest("Username not found in the access token.");
     }
-    var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims, _configuration);
+
+    var user = await _userManager.FindByNameAsync(username);
+
+    if (user == null ||
+       user.RefreshToken != refreshToken ||
+       user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+    {
+      return BadRequest("Invalid access token or refresh token!");
+    }
+
+    var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList(), _configuration);
     var newRefreshToken = _tokenService.GenerateRefreshToken();
+
     user.RefreshToken = newRefreshToken;
     await _userManager.UpdateAsync(user);
+
     return new ObjectResult(new
     {
       accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
