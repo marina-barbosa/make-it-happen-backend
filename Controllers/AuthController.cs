@@ -21,10 +21,9 @@ public class AuthController(ITokenService tokenService,
   private readonly RoleManager<IdentityRole> _roleManager = roleManager;
   private readonly IConfiguration _configuration = configuration;
 
-  // teste token
   [HttpGet("test")]
-  [Authorize]
-  public async Task<IActionResult> Test()
+  [Authorize(AuthenticationSchemes = "Bearer")]
+  public IActionResult Test()
   {
     return Ok();
   }
@@ -60,9 +59,9 @@ public class AuthController(ITokenService tokenService,
 
       return Ok(new
       {
-        token = new JwtSecurityTokenHandler().WriteToken(token),
-        refreshToken,
-        expiration = token.ValidTo
+        Token = new JwtSecurityTokenHandler().WriteToken(token),
+        RefreshToken = refreshToken,
+        Expiration = token.ValidTo
       });
     }
     return Unauthorized();
@@ -91,8 +90,9 @@ public class AuthController(ITokenService tokenService,
 
     if (!result.Succeeded)
     {
+      var errors = string.Join(", ", result.Errors.Select(e => e.Description));
       return StatusCode(StatusCodes.Status500InternalServerError,
-      new ResponseDTO { Status = "Error", Message = "User creation failed!" });
+      new ResponseDTO { Status = "Error", Message = $"User creation failed: {errors}" });
     }
     return Ok(new ResponseDTO { Status = "Success", Message = "User created successfully!" });
   }

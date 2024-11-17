@@ -1,8 +1,8 @@
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 namespace make_it_happen.Services;
 
@@ -10,19 +10,17 @@ public class TokenService : ITokenService
 {
   public JwtSecurityToken GenerateAccessToken(IEnumerable<Claim> claims, IConfiguration _config)
   {
-    var key = _config.GetSection("JWT").GetValue<String>("SecretKey") ??
+    var key = _config.GetSection("JWT").GetValue<string>("SecretKey") ??
     throw new InvalidOperationException("Missing or invalid Secret Key");
     var privateKey = Encoding.UTF8.GetBytes(key);
-    var signinCredentials = new SigningCredentials(new SymmetricSecurityKey(privateKey), SecurityAlgorithms.HmacSha256);
+    var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(privateKey), SecurityAlgorithms.HmacSha256Signature);
     var tokenDescriptor = new SecurityTokenDescriptor
     {
       Subject = new ClaimsIdentity(claims),
-      Expires = DateTime.UtcNow.AddMinutes(_config.GetSection("JWT").GetValue<int>("ExpirationInMinutes")),
-      Audience = _config.GetSection("JWT").GetValue<String>("ValidAudience") ??
-      throw new InvalidOperationException("Missing or invalid Audience"),
-      Issuer = _config.GetSection("JWT").GetValue<String>("ValidIssuer") ??
-      throw new InvalidOperationException("Missing or invalid Issuer"),
-      SigningCredentials = signinCredentials,
+      Expires = DateTime.UtcNow.AddMinutes(_config.GetSection("JWT").GetValue<double>("TokenValidityInMinutes")),
+      Audience = _config.GetSection("JWT").GetValue<string>("ValidAudience"),
+      Issuer = _config.GetSection("JWT").GetValue<string>("ValidIssuer"),
+      SigningCredentials = signingCredentials,
     };
 
     var tokenHandler = new JwtSecurityTokenHandler();
@@ -48,7 +46,7 @@ public class TokenService : ITokenService
       ValidateIssuer = false,
       ValidateIssuerSigningKey = true,
       ValidateLifetime = false,
-      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
     };
     var tokenHandler = new JwtSecurityTokenHandler();
     var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
