@@ -25,7 +25,8 @@ public class AuthController(ITokenService tokenService,
 
   [HttpGet("test")]
   // [Authorize(AuthenticationSchemes = "Bearer")]
-  [Authorize(Policy = "AdminOnly")]
+  // [Authorize(Policy = "AdminOnly")]
+  [Authorize(AuthenticationSchemes = "Bearer", Policy = "AdminOnly")]
   public IActionResult Test()
   {
     return Ok();
