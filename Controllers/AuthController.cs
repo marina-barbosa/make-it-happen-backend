@@ -23,7 +23,7 @@ public class AuthController(ITokenService tokenService,
 
   // teste token
   [HttpGet("test")]
-  // [Authorize]
+  [Authorize]
   public async Task<IActionResult> Test()
   {
     return Ok();

@@ -16,6 +16,7 @@ builder.Services.AddControllers()
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 builder.Services.AddEndpointsApiExplorer();
+// SWAGGER
 builder.Services.AddSwaggerGen(c =>
 {
   c.SwaggerDoc("v1", new() { Title = "make_it_happen", Version = "v1" });
@@ -44,7 +45,6 @@ builder.Services.AddSwaggerGen(c =>
     }
   });
 });
-
 
 // Database mySQL
 builder.Services.AddDbContext<AppDbContext>(options =>
