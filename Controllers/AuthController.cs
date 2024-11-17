@@ -106,7 +106,9 @@ public class AuthController(ITokenService tokenService,
       return BadRequest("Invalid access token or refresh token");
     }
     string? username = principal.Identity?.Name;
+#pragma warning disable CS8604 // Possível argumento de referência nula.
     var user = await _userManager.FindByNameAsync(username);
+#pragma warning restore CS8604 // Possível argumento de referência nula.
     if (user is null ||
        user.RefreshToken != refreshToken ||
        user.RefreshTokenExpiryTime <= DateTime.Now)
