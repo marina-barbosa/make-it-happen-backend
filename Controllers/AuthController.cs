@@ -6,7 +6,6 @@ using make_it_happen.DTOs;
 using make_it_happen.Services;
 using make_it_happen.Models;
 using Microsoft.AspNetCore.Authorization;
-using System.Text;
 
 namespace make_it_happen.Controllers;
 
@@ -25,7 +24,8 @@ public class AuthController(ITokenService tokenService,
   private readonly ILogger<AuthController> _logger = logger;
 
   [HttpGet("test")]
-  [Authorize(AuthenticationSchemes = "Bearer")]
+  // [Authorize(AuthenticationSchemes = "Bearer")]
+  [Authorize(Policy = "AdminOnly")]
   public IActionResult Test()
   {
     return Ok();
@@ -41,7 +41,8 @@ public class AuthController(ITokenService tokenService,
       var authClaims = new List<Claim>
       {
         new(ClaimTypes.Name, user.UserName!),
-        new(ClaimTypes.NameIdentifier, user.Id),
+        new(ClaimTypes.Email, user.Email!),
+        new("id", user.UserName!),
         new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
       };
       foreach (var userRole in userRoles)

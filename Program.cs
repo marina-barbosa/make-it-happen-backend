@@ -79,7 +79,20 @@ builder.Services.AddAuthentication("Bearer").AddJwtBearer(
                       };
                     }
 );
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+  options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+  options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+  options.AddPolicy("AdminOrUser", policy => policy.RequireRole("Admin", "User"));
+  options.AddPolicy("SuperAdminOnly", policy => policy.RequireRole("SuperAdmin")
+    .RequireClaim("id", "hortencia"));
+  options.AddPolicy("ExclusiveOnly", policy =>
+  {
+    policy.RequireAssertion(context =>
+    context.User.HasClaim(claim => claim.Type == "id" && claim.Value == "hortencia")
+                          || context.User.IsInRole("SuperAdmin"));
+  });
+});
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Identity Framework
