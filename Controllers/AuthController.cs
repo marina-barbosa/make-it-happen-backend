@@ -15,12 +15,14 @@ namespace make_it_happen.Controllers;
 public class AuthController(ITokenService tokenService,
                       UserManager<ApplicationUser> userManager,
                       RoleManager<IdentityRole> roleManager,
-                      IConfiguration configuration) : ControllerBase
+                      IConfiguration configuration,
+                      ILogger<AuthController> logger) : ControllerBase
 {
   private readonly ITokenService _tokenService = tokenService;
   private readonly UserManager<ApplicationUser> _userManager = userManager;
   private readonly RoleManager<IdentityRole> _roleManager = roleManager;
   private readonly IConfiguration _configuration = configuration;
+  private readonly ILogger<AuthController> _logger = logger;
 
   [HttpGet("test")]
   [Authorize(AuthenticationSchemes = "Bearer")]
@@ -161,4 +163,63 @@ public class AuthController(ITokenService tokenService,
     return NoContent();
   }
 
+
+  [HttpPost("create-role")]
+  public async Task<IActionResult> CreateRole(string roleName)
+  {
+    var roleExists = await _roleManager.RoleExistsAsync(roleName);
+    if (!roleExists)
+    {
+      var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+
+      if (roleResult.Succeeded)
+      {
+        _logger.LogInformation($"Role '{roleName}' created successfully.");
+        return Ok(
+          new ResponseDTO
+          {
+            Status = "Success",
+            Message = $"Role '{roleName}' created successfully."
+          });
+      }
+      else
+      {
+        var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+        return StatusCode(StatusCodes.Status500InternalServerError,
+        new ResponseDTO { Status = "Error", Message = $"Role creation failed: {errors}" });
+      }
+    }
+
+    return StatusCode(StatusCodes.Status400BadRequest,
+    new ResponseDTO { Status = "Error", Message = $"Role '{roleName}' already exists." });
+  }
+
+
+ [HttpPost("add-role-to-user")]
+ public async Task<IActionResult> AddUserToRole(string email, string roleName)
+ {
+   var user = await _userManager.FindByEmailAsync(email);
+
+   if (user != null)
+   {
+     var result = await _userManager.AddToRoleAsync(user, roleName);
+     if (result.Succeeded)
+     {
+       _logger.LogInformation($"User '{email}' added to role '{roleName}' successfully.");
+       return Ok(
+         new ResponseDTO
+         {
+           Status = "Success",
+           Message = $"User '{email}' added to role '{roleName}' successfully."
+         });
+     }
+     else
+     {
+       var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+       return StatusCode(StatusCodes.Status500InternalServerError,
+       new ResponseDTO { Status = "Error", Message = $"User '{email}' could not be added to role '{roleName}': {errors}" });
+     }
+   }
+   return BadRequest("User not found.");
+ }
 }
