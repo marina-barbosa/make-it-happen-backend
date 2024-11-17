@@ -24,8 +24,6 @@ public class AuthController(ITokenService tokenService,
   private readonly ILogger<AuthController> _logger = logger;
 
   [HttpGet("test")]
-  // [Authorize(AuthenticationSchemes = "Bearer")]
-  // [Authorize(Policy = "AdminOnly")]
   [Authorize(AuthenticationSchemes = "Bearer", Policy = "AdminOnly")]
   public IActionResult Test()
   {
