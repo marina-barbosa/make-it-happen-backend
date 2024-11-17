@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using make_it_happen.Context;
 using make_it_happen.Models;
 using make_it_happen.Repositories;
+using make_it_happen.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -47,6 +48,7 @@ builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
       System.Text.Encoding.UTF8.GetBytes(secretKey)),
   };
 });
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Identity Framework
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
