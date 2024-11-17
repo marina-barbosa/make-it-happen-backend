@@ -15,6 +15,26 @@ builder.Services.AddControllers()
   .AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
+
+// CORS
+var OrigensPermitidas = "_myAllowSpecificOrigins";
+builder.Services.AddCors(options =>
+options.AddPolicy(name: OrigensPermitidas,
+  policy =>
+  {
+    policy.WithOrigins("http://localhost:4200")
+      .AllowAnyMethod()
+      .AllowAnyHeader();
+  })
+);
+// builder.Services.AddCors(options =>
+// {
+//   options.AddPolicy("AllowOrigin", builder => builder
+//     .AllowAnyOrigin()
+//     .AllowAnyMethod()
+//     .AllowAnyHeader());
+// });
+
 builder.Services.AddEndpointsApiExplorer();
 // SWAGGER
 builder.Services.AddSwaggerGen(c =>
@@ -132,6 +152,10 @@ app.MapGet("/", () =>
 })
 .WithName("Home")
 .WithOpenApi();
+
+app.UseCors(OrigensPermitidas);
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 app.Run();
