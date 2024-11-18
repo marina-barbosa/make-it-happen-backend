@@ -3,18 +3,14 @@ using make_it_happen.DTOs;
 using make_it_happen.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
+namespace make_it_happen.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
-public class CategoryController : ControllerBase
+public class CategoryController(ICategoryRepository repository, IMapper mapper) : ControllerBase
 {
-  private readonly ICategoryRepository _repository;
-  private readonly IMapper _mapper;
-
-  public CategoryController(ICategoryRepository repository, IMapper mapper)
-  {
-    _repository = repository;
-    _mapper = mapper;
-  }
+  private readonly ICategoryRepository _repository = repository;
+  private readonly IMapper _mapper = mapper;
 
   [HttpGet]
   public async Task<IActionResult> GetAllCategories()

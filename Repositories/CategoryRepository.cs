@@ -5,17 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace make_it_happen.Repositories;
 
-public class CategoryRepository : ICategoryRepository
+public class CategoryRepository(AppDbContext context) : ICategoryRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _context = context;
 
-    public CategoryRepository(AppDbContext context)
+  public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
     {
-        _context = context;
-    }
-
-    public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
-    {
-        return await _context.Categories.ToListAsync();
+        return await _context.Categories!.ToListAsync();
     }
 }
