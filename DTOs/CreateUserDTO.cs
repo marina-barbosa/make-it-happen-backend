@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace make_it_happen.Models
-{
+namespace make_it_happen.DTOs;
   public class CreateUserDto
   {
     [Required]
@@ -30,4 +29,3 @@ namespace make_it_happen.Models
 
     public bool? EmailVerified { get; set; }
   }
-}
