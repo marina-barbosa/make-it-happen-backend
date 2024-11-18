@@ -4,6 +4,7 @@ obj
 
 # VS Code
 .vscode/
+make-it-happen-xunit-tests/UnitTests
 
 # Logs
 logs
