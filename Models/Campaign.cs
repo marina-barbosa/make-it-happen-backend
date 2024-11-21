@@ -8,7 +8,7 @@ public class Campaign
   [Key]
   public int CampaignId { get; set; }
 
-  public int UserId { get; set; }
+  public string? UserId { get; set; }
 
   [MaxLength(80)]
   public string Name { get; set; } = string.Empty;
@@ -43,7 +43,7 @@ public class Campaign
 
   [ForeignKey("UserId")]
   [JsonIgnore]
-  public virtual User? User { get; set; }
+  public virtual ApplicationUser? User { get; set; }
 
   [ForeignKey("CategoryId")]
   [JsonIgnore]

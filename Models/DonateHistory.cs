@@ -8,7 +8,7 @@ public class DonateHistory
   [Key]
   public int DonateHistoryId { get; set; }
 
-  public int? UserId { get; set; }
+  public string? UserId { get; set; }
 
   public int? CampaignId { get; set; }
 
@@ -27,7 +27,7 @@ public class DonateHistory
 
   [ForeignKey("UserId")]
   [JsonIgnore]
-  public virtual User? User { get; set; }
+  public virtual ApplicationUser? User { get; set; }
 
   [ForeignKey("CampaignId")]
   [JsonIgnore]

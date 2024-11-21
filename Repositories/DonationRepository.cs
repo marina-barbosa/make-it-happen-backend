@@ -14,7 +14,7 @@ public class DonationRepository(AppDbContext context, IMapper mapper) : IDonatio
   public async Task<IEnumerable<DonateHistory>> GetDonationsByUserIdAsync(int userId)
   {
     return await _context.DonateHistories!
-        .Where(d => d.UserId == userId)
+        .Where(d => d.UserId == userId.ToString())
         .ToListAsync();
   }
 
