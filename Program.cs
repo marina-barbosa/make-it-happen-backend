@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using make_it_happen.Context;
 using make_it_happen.Models;
-// using make_it_happen.Repositories;
+using make_it_happen.Repositories;
 using make_it_happen.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +73,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
   options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();
+builder.Services.AddScoped<IDonationRepository, DonationRepository>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 // Configuração de autenticação JWT
