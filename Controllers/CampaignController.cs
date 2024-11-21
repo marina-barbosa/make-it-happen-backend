@@ -27,7 +27,7 @@ public class CampaignController(ICampaignRepository repository, IMapper mapper) 
     if (campaign == null)
       return NotFound();
 
-    return Ok(_mapper.Map<CampaignDetailsDto>(campaign));
+    return Ok(_mapper.Map<CampaignDto>(campaign));
   }
 
   [HttpPost("create")]
@@ -38,7 +38,7 @@ public class CampaignController(ICampaignRepository repository, IMapper mapper) 
 
     var campaign = _mapper.Map<Campaign>(campaignDto);
     var result = await _repository.AddCampaignAsync(campaign);
-    return CreatedAtAction(nameof(GetCampaign), new { id = result.CampaignId }, _mapper.Map<CampaignDetailsDto>(result));
+    return CreatedAtAction(nameof(GetCampaign), new { id = result.CampaignId }, _mapper.Map<CampaignDto>(result));
   }
 
   [HttpPut("update/{id}")]
@@ -71,6 +71,6 @@ public class CampaignController(ICampaignRepository repository, IMapper mapper) 
     if (campaign == null)
       return NotFound();
 
-    return Ok(_mapper.Map<CampaignDetailsDto>(campaign));
+    return Ok(_mapper.Map<CampaignDto>(campaign));
   }
 }
