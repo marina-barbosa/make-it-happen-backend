@@ -22,9 +22,21 @@ public class CampaignRepository(AppDbContext context) : ICampaignRepository
   public async Task<Campaign?> GetCampaignByIdAsync(int id)
   {
     return await _context.Campaigns!
+        .Include(c => c.User)
         .Include(c => c.Category)
         .Include(c => c.DonationHistory)
         .FirstOrDefaultAsync(c => c.CampaignId == id);
+  }
+
+  public int GetTotalCampaignsByUserId(string userId)
+  {
+    return _context.Campaigns!.Count(c => c.UserId == userId);
+  }
+
+  
+  public int GetTotalSupportByUserId(string userId)
+  {
+    return _context.DonateHistories!.Count(d => d.UserId == userId);
   }
 
   public async Task<Campaign> AddCampaignAsync(Campaign campaign)

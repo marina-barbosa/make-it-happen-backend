@@ -7,10 +7,11 @@ public interface ICampaignRepository
 {
   Task<IEnumerable<Campaign>> GetCampaignsAsync(CampaignFilterDto filter);
   Task<Campaign?> GetCampaignByIdAsync(int id);
-
   Task<Campaign> AddCampaignAsync(Campaign campaign);
   Task UpdateCampaignAsync(Campaign campaign);
   Task DeleteCampaignAsync(int campaignId);
+  int GetTotalCampaignsByUserId(string userId);
+  int GetTotalSupportByUserId(string userId);
 }
 
 

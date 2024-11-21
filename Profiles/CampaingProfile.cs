@@ -17,5 +17,10 @@ public class CampaignProfile : Profile
     CreateMap<UpdateCampaignDto, Campaign>();
 
     CreateMap<Campaign, CampaignDto>();
+
+    CreateMap<Campaign, CampaignAndCreatorDto>()
+            .ForMember(dest => dest.Creator, opt => opt.MapFrom(src => src.User)); // Mapeando o User para Creator
+
+    CreateMap<ApplicationUser, CreatorDto>();
   }
 }

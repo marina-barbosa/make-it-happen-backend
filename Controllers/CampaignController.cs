@@ -24,10 +24,25 @@ public class CampaignController(ICampaignRepository repository, IMapper mapper) 
   public async Task<IActionResult> GetCampaignDetails(int id)
   {
     var campaign = await _repository.GetCampaignByIdAsync(id);
+
     if (campaign == null)
       return NotFound();
 
-    return Ok(_mapper.Map<CampaignDto>(campaign));
+    var creator = campaign.User;
+    if (creator == null)
+      return NotFound("Usuário criador não encontrado.");
+
+    var totalCampaigns = _repository.GetTotalCampaignsByUserId(creator.Id);
+    var totalSupport = _repository.GetTotalSupportByUserId(creator.Id);
+
+    var creatorDto = _mapper.Map<CreatorDto>(creator);
+    creatorDto.TotalCampaigns = totalCampaigns;
+    creatorDto.TotalSupport = totalSupport;
+
+    var campaignDto = _mapper.Map<CampaignAndCreatorDto>(campaign);
+    campaignDto.Creator = creatorDto;
+
+    return Ok(campaignDto);
   }
 
   [HttpPost("create")]
