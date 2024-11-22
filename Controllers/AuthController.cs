@@ -33,13 +33,13 @@ public class AuthController(ITokenService tokenService,
   [HttpPost("login")]
   public async Task<IActionResult> Login([FromBody] LoginModelDTO dto)
   {
-    var user = await _userManager.FindByNameAsync(dto.Username!);
+    var user = await _userManager.FindByEmailAsync(dto.Email!);
     if (user is not null && await _userManager.CheckPasswordAsync(user, dto.Password!))
     {
       var userRoles = await _userManager.GetRolesAsync(user);
       var authClaims = new List<Claim>
       {
-        new(ClaimTypes.Name, user.UserName!),
+        new(ClaimTypes.Name, user.FullName!),
         new(ClaimTypes.Email, user.Email!),
         new("id", user.UserName!),
         new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -74,9 +74,9 @@ public class AuthController(ITokenService tokenService,
   [HttpPost("register")]
   public async Task<IActionResult> Register([FromBody] RegisterModelDTO dto)
   {
-    var userExists = await _userManager.FindByNameAsync(dto.Username!);
+    var userEmailExists = await _userManager.FindByEmailAsync(dto.Email!);
 
-    if (userExists != null)
+    if (userEmailExists != null)
     {
       return StatusCode(StatusCodes.Status500InternalServerError,
       new ResponseDTO { Status = "Error", Message = "User already exists!" });
@@ -84,6 +84,7 @@ public class AuthController(ITokenService tokenService,
 
     ApplicationUser user = new()
     {
+      FullName = dto.FullName!,
       Email = dto.Email,
       SecurityStamp = Guid.NewGuid().ToString(),
       UserName = dto.Username
@@ -102,11 +103,11 @@ public class AuthController(ITokenService tokenService,
 
 
   [HttpPost("refresh-token")]
-  public async Task<IActionResult> RefreshToken(TokenModelDTO dto)
+  public async Task<IActionResult> RefreshToken([FromBody] TokenModelDTO dto)
   {
     if (dto is null)
     {
-      return BadRequest("Invalid client request");
+      return BadRequest("Invalid client request.");
     }
 
     if (string.IsNullOrEmpty(dto.AccessToken) || string.IsNullOrEmpty(dto.RefreshToken))
@@ -114,40 +115,61 @@ public class AuthController(ITokenService tokenService,
       return BadRequest("Access token and refresh token are required.");
     }
 
-    string? accessToken = dto.AccessToken;
-    string? refreshToken = dto.RefreshToken;
+    string accessToken = dto.AccessToken;
+    string refreshToken = dto.RefreshToken;
+
+    // Obter informações do token expirado
     var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken, _configuration);
 
     if (principal is null)
     {
       return BadRequest("Invalid access token or refresh token.");
     }
-    string? username = principal.Identity?.Name;
 
-    if (string.IsNullOrEmpty(username))
+    // Buscar o email no token
+    string? email = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+
+    if (string.IsNullOrEmpty(email))
     {
-      return BadRequest("Username not found in the access token.");
+      return BadRequest("Email not found in the access token.");
     }
 
-    var user = await _userManager.FindByNameAsync(username);
+    // Buscar o usuário pelo email
+    var user = await _userManager.FindByEmailAsync(email);
 
-    if (user == null ||
-       user.RefreshToken != refreshToken ||
-       user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+    if (user == null)
     {
       return BadRequest("Invalid access token or refresh token!");
     }
 
+    // Validar o Refresh Token
+    if (user.RefreshToken != refreshToken)
+    {
+      return BadRequest("Invalid access token or refresh token!");
+    }
+
+    // Verificar se o Refresh Token está expirado
+    if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+    {
+      return BadRequest("Invalid access token or refresh token!");
+    }
+
+    // Gerar novos tokens
     var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList(), _configuration);
     var newRefreshToken = _tokenService.GenerateRefreshToken();
 
+    // Atualizar o Refresh Token no banco
     user.RefreshToken = newRefreshToken;
+    user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(
+        int.Parse(_configuration["JWT:RefreshTokenExpirationInDays"] ?? "7"));
+
     await _userManager.UpdateAsync(user);
 
+    // Retornar os novos tokens
     return new ObjectResult(new
     {
-      accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-      refreshToken = newRefreshToken
+      AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+      RefreshToken = newRefreshToken
     });
   }
 
@@ -195,31 +217,31 @@ public class AuthController(ITokenService tokenService,
   }
 
 
- [HttpPost("add-role-to-user")]
- public async Task<IActionResult> AddUserToRole(string email, string roleName)
- {
-   var user = await _userManager.FindByEmailAsync(email);
+  [HttpPost("add-role-to-user")]
+  public async Task<IActionResult> AddUserToRole(string email, string roleName)
+  {
+    var user = await _userManager.FindByEmailAsync(email);
 
-   if (user != null)
-   {
-     var result = await _userManager.AddToRoleAsync(user, roleName);
-     if (result.Succeeded)
-     {
-       _logger.LogInformation($"User '{email}' added to role '{roleName}' successfully.");
-       return Ok(
-         new ResponseDTO
-         {
-           Status = "Success",
-           Message = $"User '{email}' added to role '{roleName}' successfully."
-         });
-     }
-     else
-     {
-       var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-       return StatusCode(StatusCodes.Status500InternalServerError,
-       new ResponseDTO { Status = "Error", Message = $"User '{email}' could not be added to role '{roleName}': {errors}" });
-     }
-   }
-   return BadRequest("User not found.");
- }
+    if (user != null)
+    {
+      var result = await _userManager.AddToRoleAsync(user, roleName);
+      if (result.Succeeded)
+      {
+        _logger.LogInformation($"User '{email}' added to role '{roleName}' successfully.");
+        return Ok(
+          new ResponseDTO
+          {
+            Status = "Success",
+            Message = $"User '{email}' added to role '{roleName}' successfully."
+          });
+      }
+      else
+      {
+        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        return StatusCode(StatusCodes.Status500InternalServerError,
+        new ResponseDTO { Status = "Error", Message = $"User '{email}' could not be added to role '{roleName}': {errors}" });
+      }
+    }
+    return BadRequest("User not found.");
+  }
 }
